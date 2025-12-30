@@ -6,3 +6,5 @@ faiss-cpu
 networkx
 PyPDF2
 python-pptx
+pypdf
+langchain-text-splitters
