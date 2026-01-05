@@ -8,3 +8,6 @@ PyPDF2
 python-pptx
 pypdf
 langchain-text-splitters
+fastapi
+uvicorn[standard]
+pydantic
