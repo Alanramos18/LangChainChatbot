@@ -7,7 +7,6 @@ import networkx as nx
 load_dotenv()
 embeddings = GoogleGenerativeAIEmbeddings(model="gemini-embedding-001")
 faiss_index = FAISS.load_local("faiss_index", embeddings=embeddings, allow_dangerous_deserialization=True)
-retriever = faiss_index.as_retriever(search_kwargs={"k": 3})
 llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0)
 
 def extract_entities_and_relationships(chunk_text):
@@ -17,7 +16,7 @@ def extract_entities_and_relationships(chunk_text):
     Texto:
     {chunk_text}
     """
-    resultado = llm.invoke({"input": prompt})["answer"]
+    resultado = llm.invoke(prompt).content
     relaciones = []
     for line in resultado.split("\n"):
         parts = [p.strip() for p in line.split(",")]
@@ -27,7 +26,8 @@ def extract_entities_and_relationships(chunk_text):
 
 G = nx.DiGraph()
 
-for doc in faiss_index.as_retriever()._get_relevant_documents("", run_manager=None):
+for doc_id in faiss_index.index_to_docstore_id.values():
+    doc = faiss_index.docstore.search(doc_id)
     relaciones = extract_entities_and_relationships(doc.page_content)
     for ent1, rel, ent2 in relaciones:
         G.add_node(ent1)
